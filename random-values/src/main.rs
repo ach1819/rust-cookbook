@@ -1,4 +1,4 @@
-use rand::distributions::{Distribution, Uniform};
+use rand::distributions::{Distribution, Standard, Uniform};
 use rand::Rng;
 
 fn main() {
@@ -6,6 +6,7 @@ fn main() {
     generate_random_range_numbers();
     // This could take some time
     generate_random_with_uniform();
+    generate_random_values_of_custom_type();
 }
 
 fn genarate_random_types() {
@@ -31,6 +32,7 @@ fn generate_random_range_numbers() {
 }
 
 fn generate_random_with_uniform() {
+    println!("\n*** Starts - Generation random using uniform ***");
     let mut rng = rand::thread_rng();
     let die = Uniform::from(1..7);
 
@@ -41,4 +43,29 @@ fn generate_random_with_uniform() {
             break;
         }
     }
+}
+
+#[derive(Debug)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+impl Distribution<Point> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Point {
+        let (rand_x, rand_y) = rng.gen();
+        Point {
+            x: rand_x,
+            y: rand_y,
+        }
+    }
+}
+
+fn generate_random_values_of_custom_type() {
+    println!("\n*** Starts - Generation random custom types ***");
+    let mut rng = rand::thread_rng();
+    let rand_tuple = rng.gen::<(i32, bool, f64)>();
+    let rand_point: Point = rng.gen();
+    println!("Random tuple: {:?}", rand_tuple);
+    println!("Random Point: {:?}", rand_point);
 }
