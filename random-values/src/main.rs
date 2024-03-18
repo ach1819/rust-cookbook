@@ -1,11 +1,16 @@
 use rand::Rng;
 
 fn main() {
+
     genarate_random_types();
+    generate_random_range_numbers();
+
 }
 
 
 fn genarate_random_types() {
+
+    println!("*** Starts - Generation random by type ***");
     let mut rng = rand::thread_rng();
 
     let n1: u8 = rng.gen();
@@ -17,6 +22,16 @@ fn genarate_random_types() {
     println!("Random i32: {}", rng.gen::<i32>());
     println!("Random float: {}", rng.gen::<f64>());
 
+}
 
+fn generate_random_range_numbers() {
+
+    println!("\n*** Starts - Generation random by range ***");
+    let mut rng = rand::thread_rng();
+
+    println!("Integer: {}", rng.gen_range(0..10));
+    println!("Float: {}", rng.gen_range(0.0..10.0));
 
 }
+
+
