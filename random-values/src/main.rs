@@ -1,5 +1,5 @@
-use rand::distributions::{Distribution, Standard, Uniform};
-use rand::Rng;
+use rand::distributions::{Alphanumeric, Distribution, Standard, Uniform};
+use rand::{thread_rng, Rng};
 
 fn main() {
     genarate_random_types();
@@ -7,6 +7,7 @@ fn main() {
     // This could take some time
     generate_random_with_uniform();
     generate_random_values_of_custom_type();
+    generate_random_password();
 }
 
 fn genarate_random_types() {
@@ -68,4 +69,15 @@ fn generate_random_values_of_custom_type() {
     let rand_point: Point = rng.gen();
     println!("Random tuple: {:?}", rand_tuple);
     println!("Random Point: {:?}", rand_point);
+}
+
+fn generate_random_password() {
+    println!("\n*** Starts - Generation random passwords ***");
+    let rand_string: String = thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(30)
+        .map(char::from)
+        .collect();
+
+    println!("Your secure password: {}", rand_string);
 }
