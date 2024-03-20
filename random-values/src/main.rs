@@ -8,6 +8,7 @@ fn main() {
     generate_random_with_uniform();
     generate_random_values_of_custom_type();
     generate_random_password();
+    generate_random_password_user_defined();
 }
 
 fn genarate_random_types() {
@@ -80,4 +81,22 @@ fn generate_random_password() {
         .collect();
 
     println!("Your secure password: {}", rand_string);
+}
+
+fn generate_random_password_user_defined() {
+    println!("\n*** Starts - Generation random passwords user defined ***");
+    const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+                            abcdefghijklmnopqrstuvwxyz\
+                            0123456789)(*&^%$#@!~";
+
+    const PASSWORD_LEN: usize = 30;
+    let mut rng = rand::thread_rng();
+
+    let password: String = (0..PASSWORD_LEN)
+        .map(|_| {
+            let idx = rng.gen_range(0..CHARSET.len());
+            CHARSET[idx] as char
+        })
+        .collect();
+    println!("Your secure password (again): {:?}", password);
 }
