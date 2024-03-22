@@ -1,6 +1,9 @@
+use ansi_term::{Colour, Style};
 use clap::{Arg, Command};
+
 fn main() {
     argument_parsing();
+    ansi_terminal_color();
 }
 
 fn argument_parsing() {
@@ -29,4 +32,27 @@ fn argument_parsing() {
             Err(_) => println!("That's not a number! {}", n),
         },
     }
+}
+
+fn ansi_terminal_color() {
+    println!(
+        "This is {} in color, {} in color and {} in color",
+        Colour::Red.paint("Red"),
+        Colour::Blue.paint("blue"),
+        Colour::Green.paint("green")
+    );
+
+    println!("\nSome styles\n");
+
+    println!(
+        "{} and this is not",
+        Style::new().bold().paint("This is Bold")
+    );
+
+    println!(
+        "{}, {} and {}",
+        Colour::Yellow.paint("This is colored"),
+        Style::new().bold().paint("this is bold"),
+        Colour::Yellow.bold().paint("this is bold and colored"),
+    );
 }
