@@ -11,7 +11,7 @@
     2.1 Argument Parsing
     2.2 ANSI Terminal
 
-3. Comprssion
+3. Compression
     3.1 Working with Tarballs
 
 4. Concurreny
