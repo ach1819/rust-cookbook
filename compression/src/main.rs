@@ -3,7 +3,9 @@ use std::fs::File;
 use tar::Archive;
 
 fn main() -> Result<(), std::io::Error> {
-    decompress_tarball()
+    decompress_tarball()?;
+    compress_directory_into_tarball()?;
+    decompress_tarball_while_removing_prefix_from_paths()
 }
 
 fn decompress_tarball() -> Result<(), std::io::Error> {
@@ -15,4 +17,12 @@ fn decompress_tarball() -> Result<(), std::io::Error> {
     archive.unpack(".")?;
 
     Ok(())
+}
+
+fn compress_directory_into_tarball() -> Result<(), std::io::Error> {
+    unimplemented!()
+}
+
+fn decompress_tarball_while_removing_prefix_from_paths() -> Result<(), std::io::Error>{
+    unimplemented!()
 }
