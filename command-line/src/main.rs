@@ -53,6 +53,6 @@ fn ansi_terminal_color() {
         "{}, {} and {}",
         Colour::Yellow.paint("This is colored"),
         Style::new().bold().paint("this is bold"),
-        Colour::Yellow.bold().paint("this is bold and olored"),
+        Colour::Yellow.bold().paint("this is bold and colored"),
     );
 }
