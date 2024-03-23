@@ -15,4 +15,4 @@
     3.1 Working with Tarballs
 
 4. Concurreny
-    3.2 Explicit threads
+    4.1 Explicit threads
