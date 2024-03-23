@@ -10,3 +10,6 @@
 2. Command line
     2.1 Argument Parsing
     2.2 ANSI Terminal
+
+3. Comprssion
+    3.1 Working with Tarballs
