@@ -1,16 +1,20 @@
 extern crate crossbeam;
 extern crate crossbeam_channel;
 
+use std::sync::Mutex;
 use std::time::Duration;
 use std::{thread, time};
 
 use crossbeam_channel::bounded;
 use crossbeam_channel::unbounded;
 
+use lazy_static::lazy_static;
+
 fn main() {
     spawn_short_lived_thread();
     parallel_pipeline();
     pass_data_between_two_threads();
+    maintain_global_mutable_state().unwrap();
 }
 
 fn spawn_short_lived_thread() {
@@ -105,4 +109,29 @@ fn pass_data_between_two_threads() {
         let msg = rcv.recv().unwrap();
         println!("Received {}", msg);
     }
+}
+
+lazy_static! {
+    static ref FRUIT: Mutex<Vec<String>> = Mutex::new(Vec::new());
+}
+
+fn insert(fruit: &str) -> Result<(), &'static str> {
+    let mut db = FRUIT.lock().map_err(|_| "Failed to acquire MutexGuard")?;
+    db.push(fruit.to_string());
+    Ok(())
+}
+
+fn maintain_global_mutable_state() -> Result<(), &'static str> {
+    println!("\nmaintain_global_mutable_state - starts");
+    insert("apple")?;
+    insert("orange")?;
+    insert("peach")?;
+    {
+        let db = FRUIT.lock().map_err(|_| "Failed to acquire MutexGuard")?;
+        db.iter()
+            .enumerate()
+            .for_each(|(i, item)| println!("{}: {}", i, item))
+    }
+    insert("grape")?;
+    Ok(())
 }
