@@ -1,14 +1,16 @@
 extern crate crossbeam;
 extern crate crossbeam_channel;
 
-use std::thread;
 use std::time::Duration;
+use std::{thread, time};
 
 use crossbeam_channel::bounded;
+use crossbeam_channel::unbounded;
 
 fn main() {
     spawn_short_lived_thread();
     parallel_pipeline();
+    pass_data_between_two_threads();
 }
 
 fn spawn_short_lived_thread() {
@@ -80,5 +82,27 @@ fn parallel_pipeline() {
         for msg in rcv2.iter() {
             println!("Sink received {}", msg);
         }
-    }).unwrap();
+    })
+    .unwrap()
+}
+
+fn pass_data_between_two_threads() {
+    println!("\npass_data_between_two_threads - starts");
+    let (snd, rcv) = unbounded();
+    let n_msgs = 5;
+
+    crossbeam::scope(|s| {
+        s.spawn(|_| {
+            for i in 0..n_msgs {
+                snd.send(i).unwrap();
+                thread::sleep(time::Duration::from_millis(100))
+            }
+        });
+    })
+    .unwrap();
+
+    for _ in 0..n_msgs {
+        let msg = rcv.recv().unwrap();
+        println!("Received {}", msg);
+    }
 }
