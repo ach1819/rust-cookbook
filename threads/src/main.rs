@@ -1,6 +1,11 @@
 extern crate crossbeam;
 extern crate crossbeam_channel;
 
+use std::env;
+use std::fs::File;
+use std::io::{BufReader, Error, Read};
+use std::path::Path;
+use std::sync::mpsc::channel;
 use std::sync::Mutex;
 use std::time::Duration;
 use std::{thread, time};
@@ -9,12 +14,16 @@ use crossbeam_channel::bounded;
 use crossbeam_channel::unbounded;
 
 use lazy_static::lazy_static;
+use ring::digest::{Context, Digest, SHA256};
+use threadpool::ThreadPool;
+use walkdir::WalkDir;
 
 fn main() {
     spawn_short_lived_thread();
     parallel_pipeline();
     pass_data_between_two_threads();
     maintain_global_mutable_state().unwrap();
+    calculate_sha256().unwrap();
 }
 
 fn spawn_short_lived_thread() {
@@ -133,5 +142,53 @@ fn maintain_global_mutable_state() -> Result<(), &'static str> {
             .for_each(|(i, item)| println!("{}: {}", i, item))
     }
     insert("grape")?;
+    Ok(())
+}
+
+fn compute_digest<P: AsRef<Path>>(filepath: P) -> Result<(Digest, P), Error> {
+    let mut buf_reader = BufReader::new(File::open(&filepath)?);
+    let mut context = Context::new(&SHA256);
+    let mut buffer = [0; 1024];
+
+    loop {
+        let count = buf_reader.read(&mut buffer)?;
+        if count == 0 {
+            break;
+        }
+        context.update(&buffer[..count]);
+    }
+    Ok((context.finish(), filepath))
+}
+
+fn calculate_sha256() -> Result<(), Error> {
+    println!("\ncalculate_sha256 - starts");
+    let pool = ThreadPool::new(num_cpus::get());
+
+    let (tx, rx) = channel();
+    let path = env::var("PATH_TO_SHA").unwrap_or(String::from(""));
+
+    if path == "" {
+        println!("No path to calculate sha");
+        return Ok(());
+    }
+
+    for entry in WalkDir::new(path)
+        .follow_links(true)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| !e.path().is_dir())
+    {
+        let path = entry.path().to_owned();
+        let tx = tx.clone();
+        pool.execute(move || {
+            let digest = compute_digest(path);
+            tx.send(digest).expect("Could not send data!");
+        });
+    }
+    drop(tx);
+    for t in rx.iter() {
+        let (sha, path) = t?;
+        println!("{:?} {:?}", sha, path);
+    }
     Ok(())
 }
