@@ -19,6 +19,7 @@ use num::Complex;
 use ring::digest::{Context, Digest, SHA256};
 use threadpool::ThreadPool;
 use walkdir::WalkDir;
+use rayon::prelude::*;
 
 fn main() {
     spawn_short_lived_thread();
@@ -27,6 +28,7 @@ fn main() {
     maintain_global_mutable_state().unwrap();
     calculate_sha256().unwrap();
     draw_fractal_dispatching_work().unwrap();
+    mutate_array_parallel();
 }
 
 fn spawn_short_lived_thread() {
@@ -283,4 +285,12 @@ fn draw_fractal_dispatching_work() -> Result<(), RecvError> {
 
     let _ = img.save("output.png");
     Ok(())
+}
+
+
+fn mutate_array_parallel() {
+    println!("\nmutate_array_parallel - starts");
+    let mut arr = [0, 7, 9, 11];
+    arr.par_iter_mut().for_each(|p| *p -= 1);
+    println!("{:?}", arr);
 }
