@@ -16,10 +16,10 @@ use crossbeam_channel::unbounded;
 use image::{ImageBuffer, Pixel, Rgb};
 use lazy_static::lazy_static;
 use num::Complex;
+use rayon::prelude::*;
 use ring::digest::{Context, Digest, SHA256};
 use threadpool::ThreadPool;
 use walkdir::WalkDir;
-use rayon::prelude::*;
 
 fn main() {
     spawn_short_lived_thread();
@@ -29,6 +29,7 @@ fn main() {
     calculate_sha256().unwrap();
     draw_fractal_dispatching_work().unwrap();
     mutate_array_parallel();
+    test_any_element_match_given_predicate();
 }
 
 fn spawn_short_lived_thread() {
@@ -287,10 +288,28 @@ fn draw_fractal_dispatching_work() -> Result<(), RecvError> {
     Ok(())
 }
 
-
 fn mutate_array_parallel() {
     println!("\nmutate_array_parallel - starts");
     let mut arr = [0, 7, 9, 11];
     arr.par_iter_mut().for_each(|p| *p -= 1);
     println!("{:?}", arr);
+}
+
+fn test_any_element_match_given_predicate() {
+    println!("\ntest_any_element_match_given_predicate - starts");
+    let mut vec = vec![2, 4, 6, 8];
+
+    assert!(!vec.par_iter().any(|n| (*n % 2) != 0));
+    assert!(vec.par_iter().all(|n| (*n % 2) == 0));
+    assert!(!vec.par_iter().any(|n| *n > 8));
+    assert!(vec.par_iter().all(|n| *n <= 8));
+
+    vec.push(9);
+
+    assert!(vec.par_iter().any(|n| (*n % 2) != 0));
+    assert!(!vec.par_iter().all(|n| (*n % 2) == 0));
+    assert!(vec.par_iter().any(|n| *n > 8));
+    assert!(!vec.par_iter().all(|n| *n <= 8));
+
+    println!("All asserts OK");
 }
