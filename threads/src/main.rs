@@ -21,6 +21,8 @@ use ring::digest::{Context, Digest, SHA256};
 use threadpool::ThreadPool;
 use walkdir::WalkDir;
 
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
+
 fn main() {
     spawn_short_lived_thread();
     parallel_pipeline();
@@ -31,6 +33,7 @@ fn main() {
     mutate_array_parallel();
     test_any_element_match_given_predicate();
     search_item_given_predicate();
+    sort_vector_parallel();
 }
 
 fn spawn_short_lived_thread() {
@@ -328,4 +331,17 @@ fn search_item_given_predicate() {
     assert!(f3 > Some(&8));
 
     println!("All asserts OK");
+}
+
+fn sort_vector_parallel() {
+    println!("\nsort_vector_parallel - starts");
+    let mut vec = vec![String::new(); 100_000];
+    vec.par_iter_mut().for_each(|p| {
+        let mut rng = thread_rng();
+            *p = (0..5)
+            .map(|_| char::from_u32(rng.sample(&Alphanumeric) as u32).unwrap())
+            .collect();
+    });
+    vec.par_sort_unstable();
+    println!("sort_vector_parallel - OK");
 }
