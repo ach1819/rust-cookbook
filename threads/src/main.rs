@@ -30,6 +30,7 @@ fn main() {
     draw_fractal_dispatching_work().unwrap();
     mutate_array_parallel();
     test_any_element_match_given_predicate();
+    search_item_given_predicate();
 }
 
 fn spawn_short_lived_thread() {
@@ -310,6 +311,21 @@ fn test_any_element_match_given_predicate() {
     assert!(!vec.par_iter().all(|n| (*n % 2) == 0));
     assert!(vec.par_iter().any(|n| *n > 8));
     assert!(!vec.par_iter().all(|n| *n <= 8));
+
+    println!("All asserts OK");
+}
+
+fn search_item_given_predicate() {
+    println!("\nsearch_item_given_predicate - starts");
+    let v = vec![6, 2, 1, 9, 3, 8, 11];
+
+    let f1 = v.par_iter().find_any(|&&x| x == 9);
+    let f2 = v.par_iter().find_any(|&&x| x % 2 == 0 && x > 6);
+    let f3 = v.par_iter().find_any(|&&x| x > 8);
+
+    assert_eq!(f1, Some(&9));
+    assert_eq!(f2, Some(&8));
+    assert!(f3 > Some(&8));
 
     println!("All asserts OK");
 }
