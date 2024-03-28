@@ -35,6 +35,7 @@ fn main() {
     search_item_given_predicate();
     sort_vector_parallel();
     map_reduce_parallel();
+    generate_jpg_thumbnails();
 }
 
 fn spawn_short_lived_thread() {
@@ -380,4 +381,8 @@ fn map_reduce_parallel() {
     assert!((avg_over_30 - alt_avg_over_30).abs() < std::f32::EPSILON);
     println!("The average age of people older than 30 is {}", avg_over_30);
 
+}
+
+fn generate_jpg_thumbnails() {
+    unimplemented!()
 }

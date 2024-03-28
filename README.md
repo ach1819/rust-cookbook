@@ -16,3 +16,4 @@
 
 4. Concurreny
     4.1 Explicit threads
+    4.2 Data Parallelism
