@@ -5,6 +5,7 @@ use rusqlite::{Connection, Result};
 fn main() {
     create_sqlite_database().expect("Error creating database or tables");
     instert_selet_data().expect("Error inserting or selecting data from database");
+    using_transactions().expect("Error running transactions");
 }
 
 fn create_sqlite_database() -> Result<()> {
@@ -38,6 +39,7 @@ struct Cat {
     color: String,
 }
 fn instert_selet_data() -> Result<()> {
+    println!("\ninstert_selet_data - starts");
     let conn = Connection::open("cats.db")?;
 
     let mut cat_colors = HashMap::new();
@@ -79,5 +81,44 @@ fn instert_selet_data() -> Result<()> {
         println!("Found cat {:?}", cat);
     }
 
+    println!("instert_selet_data - OK");
     Ok(())
+}
+
+fn using_transactions() -> Result<()> {
+    println!("\nusing_transactions - starts");
+    let mut conn = Connection::open("cats.db")?;
+
+    successful_tx(&mut conn)?;
+
+    let res = rolled_back_tx(&mut conn);
+    assert!(res.is_err());
+
+    println!("using_transactions - OK");
+    Ok(())
+}
+
+fn successful_tx(conn: &mut Connection) -> Result<()> {
+    println!("\nsuccessful_tx - starts");
+    let tx = conn.transaction()?;
+
+    tx.execute("DELETE FROM cat_colors", ())?;
+    tx.execute("INSERT INTO cat_colors (name) VALUES (?1)", &[&"lavender"])?;
+    tx.execute("INSERT INTO cat_colors (name) VALUES (?1)", &[&"blue"])?;
+
+    println!("successful_tx - OK");
+    tx.commit()
+}
+
+fn rolled_back_tx(conn: &mut Connection) -> Result<()> {
+    println!("\nrolled_back_tx - starts");
+    let tx = conn.transaction()?;
+
+    tx.execute("DELETE FROM cat_colors", ())?;
+    tx.execute("INSERT INTO cat_colors (name) VALUES (?1)", &[&"lavender"])?;
+    tx.execute("INSERT INTO cat_colors (name) VALUES (?1)", &[&"blue"])?;
+    tx.execute("INSERT INTO cat_colors (name) VALUES (?1)", &[&"lavender"])?;
+
+    println!("rolled_back_tx - OK");
+    tx.commit()
 }
