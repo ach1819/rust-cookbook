@@ -17,3 +17,10 @@
 4. Concurreny
     4.1 Explicit threads
     4.2 Data Parallelism
+
+5. Cryptography
+    5.1 Hashing
+    5.2 Encryption
+
+6. Data structures
+    6.1 Bitfield
