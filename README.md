@@ -24,3 +24,6 @@
 
 6. Data structures
     6.1 Bitfield
+
+7. Database
+    7.1 SQLite

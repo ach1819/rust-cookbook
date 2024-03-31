@@ -1,11 +1,16 @@
 use std::collections::HashMap;
 
+use postgres::{Client, Error, GenericClient, NoTls};
 use rusqlite::{Connection, Result};
 
 fn main() {
     create_sqlite_database().expect("Error creating database or tables");
     instert_selet_data().expect("Error inserting or selecting data from database");
     using_transactions().expect("Error running transactions");
+
+    // Postgres
+    create_postgres_database().expect("Error creating database or table in postgres");
+    insert_query_data().expect("Error inserting and querying data");
 }
 
 fn create_sqlite_database() -> Result<()> {
@@ -121,4 +126,76 @@ fn rolled_back_tx(conn: &mut Connection) -> Result<()> {
 
     println!("rolled_back_tx - OK");
     tx.commit()
+}
+
+fn create_postgres_database() -> Result<(), Error> {
+    println!("\ncreate_postgres_database - starts");
+    let conn_str = std::env::var("CONN_STR").expect("Not connection string provided");
+    let mut client = Client::connect(&conn_str, NoTls)?;
+
+    client.batch_execute(
+        "
+        CREATE TABLE IF NOT EXISTS author (
+            id      SERIAL PRIMARY KEY,
+            name    VARCHAR NOT NULL,
+            country VARCHAR NOT NULL
+        )
+    ",
+    )?;
+
+    client.batch_execute(
+        "
+        CREATE TABLE IF NOT EXISTS book (
+            id          SERIAL PRIMARY KEY,
+            title       VARCHAR NOT NULL,
+            author_id   INTEGER NOT NULL REFERENCES author
+
+        )
+    ",
+    )?;
+
+    println!("create_postgres_database - OK");
+    Ok(())
+}
+
+struct Author {
+    _id: i32,
+    name: String,
+    country: String,
+}
+
+fn insert_query_data() -> Result<(), Error> {
+    println!("\ninsert_query_data - starts");
+    let conn_str = std::env::var("CONN_STR").expect("Not connection string provided");
+    let mut client = Client::connect(&conn_str, NoTls)?;
+
+    let mut authors = HashMap::new();
+    authors.insert(String::from("Chinua Achebe"), "Nigeria");
+    authors.insert(String::from("Rabindranath Tagore"), "India");
+    authors.insert(String::from("Anita Nair"), "India");
+
+    for (key, vaule) in &authors {
+        let author = Author {
+            _id: 0,
+            name: key.to_string(),
+            country: vaule.to_string(),
+        };
+
+        client.execute(
+            "INSERT INTO author (name, country) VALUES ($1, $2)",
+            &[&author.name, &author.country],
+        )?;
+    }
+
+    for row in client.query("SELECT id, name, country FROM author", &[])? {
+        let author = Author {
+            _id: row.get(0),
+            name: row.get(1),
+            country: row.get(2),
+        };
+        println!("Author {} is from {}", author.name, author.country);
+    }
+
+    println!("insert_query_data - OK");
+    Ok(())
 }
