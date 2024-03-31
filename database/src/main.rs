@@ -11,6 +11,7 @@ fn main() {
     // Postgres
     create_postgres_database().expect("Error creating database or table in postgres");
     insert_query_data().expect("Error inserting and querying data");
+    aggregate_data().expect("Error agregating data");
 }
 
 fn create_sqlite_database() -> Result<()> {
@@ -197,5 +198,36 @@ fn insert_query_data() -> Result<(), Error> {
     }
 
     println!("insert_query_data - OK");
+    Ok(())
+}
+
+struct Nation {
+    nationality: String,
+    count: i64,
+}
+
+fn aggregate_data() -> Result<(), Error> {
+    todo!("Not tested, just coded");
+    println!("\naggregate_data - starts");
+    let conn_str = std::env::var("CONN_STR").expect("Not connection string provided");
+    let mut client = Client::connect(&conn_str, NoTls)?;
+
+    for row in client.query(
+        "SELECT nationality, COUNT(nationality) as count
+        FROM artists GROUP BY nationality ORDER BY count DESC",
+        &[],
+    )? {
+        let (nationality, count): (Option<String>, Option<i64>) = (row.get(0), row.get(1));
+
+        if nationality.is_some() && count.is_some() {
+            let nation = Nation {
+                nationality: nationality.unwrap(),
+                count: count.unwrap(),
+            };
+                println!("{} {}", nation.nationality, nation.count);
+        }
+    }
+
+    println!("\naggregate_data - OK");
     Ok(())
 }
