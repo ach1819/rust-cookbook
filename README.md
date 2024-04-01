@@ -27,3 +27,7 @@
 
 7. Database
     7.1 SQLite
+    7.2 Postgres
+
+8. Date and time
+    8.1 Duration and Calculation

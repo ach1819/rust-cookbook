@@ -206,8 +206,8 @@ struct Nation {
     count: i64,
 }
 
+// "Not tested, just coded"
 fn aggregate_data() -> Result<(), Error> {
-    todo!("Not tested, just coded");
     println!("\naggregate_data - starts");
     let conn_str = std::env::var("CONN_STR").expect("Not connection string provided");
     let mut client = Client::connect(&conn_str, NoTls)?;
