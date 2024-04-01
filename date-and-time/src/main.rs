@@ -1,10 +1,11 @@
 use std::{thread, time::{Duration, Instant}};
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, FixedOffset, Local, Utc};
 
 fn main() {
     measure_elapsed_time_between();
     perform_checked_date_time_calculations();
+    convert_local_time_to_timezone();
 }
 
 fn expensive_function() {
@@ -41,4 +42,19 @@ fn perform_checked_date_time_calculations() {
         None => eprintln!("We can't use chrono to tell the time for the Solar System to complete more than one full orbit around the galactic center."),
     }
     println!("perform_checked_date_time_calculations - OK");
+}
+
+fn convert_local_time_to_timezone() {
+    let local_time = Local::now();
+    let utc_time = chrono::Utc::now();
+    let china_timezone = FixedOffset::east_opt(8 * 3600);
+    let rio_timezone = FixedOffset::west_opt(2 * 3600);
+    println!("Local time now is {}", local_time);
+    println!("UTC time now is {}", utc_time);
+    println!(
+        "Time in Hong Kong now is {}",
+        utc_time.with_timezone(&china_timezone.unwrap())
+    );
+    println!("Time in Rio de Janeiro now is {}", utc_time.with_timezone(&rio_timezone.unwrap()));
+
 }
