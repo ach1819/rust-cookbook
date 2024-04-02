@@ -31,3 +31,4 @@
 
 8. Date and time
     8.1 Duration and Calculation
+    8.2 Parsing and Displaying
