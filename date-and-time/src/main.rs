@@ -3,7 +3,10 @@ use std::{
     time::{Duration, Instant},
 };
 
-use chrono::{DateTime, Datelike, FixedOffset, Local, NaiveDate, NaiveDateTime, NaiveTime, ParseError, Timelike, Utc};
+use chrono::{
+    DateTime, Datelike, FixedOffset, Local, NaiveDate, NaiveDateTime, NaiveTime, ParseError,
+    Timelike, Utc,
+};
 
 fn main() {
     measure_elapsed_time_between();
@@ -134,8 +137,6 @@ fn parse_string_into_datetime() -> Result<(), ParseError> {
 
     let custom = DateTime::parse_from_str("5.8.1994 8:00 am +0000", "%d.%m.%Y %H:%M %P %z")?;
     println!("{}", custom);
-
-
 
     let time_only = NaiveTime::parse_from_str("23:56:04", "%H:%M:%S")?;
     println!("{}", time_only);
