@@ -9,7 +9,11 @@ fn main() {
     //
 
     // should run alone too
-    log_to_unix_syslog().expect("Error in log to the unix syslog");
+    //log_to_unix_syslog().expect("Error in log to the unix syslog");
+    //return;
+
+    // should run alone
+    //enable_log_levels_by_module();
     //return;
 
     let use_stdout = std::env::var("USE_STDOUT")
@@ -86,4 +90,28 @@ fn log_to_unix_syslog() -> Result<(), syslog::Error> {
     log::debug!("this is a debug {}", "message");
     log::error!("this is an error!");
     Ok(())
+}
+
+mod foo {
+    mod bar {
+        pub fn run() {
+            log::warn!("[bar] warn");
+            log::info!("[bar] info");
+            log::debug!("[bar] debug");
+        }
+    }
+
+    pub fn run() {
+        log::warn!("[foo] warn");
+        log::info!("[foo] info");
+        log::debug!("[foo] debug");
+        bar::run();
+    }
+}
+fn enable_log_levels_by_module() {
+    env_logger::init();
+    log::warn!("[root] warn");
+    log::info!("[root] info");
+    log::debug!("[root] debug");
+    foo::run();
 }
