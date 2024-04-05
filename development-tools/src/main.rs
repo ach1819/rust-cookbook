@@ -16,6 +16,10 @@ fn main() {
     //enable_log_levels_by_module();
     //return;
 
+    // should run alone
+    //custom_env_variable_setup_logging();
+    //return;
+
     let use_stdout = std::env::var("USE_STDOUT")
         .map(|v| v == "true")
         .unwrap_or(false);
@@ -114,4 +118,14 @@ fn enable_log_levels_by_module() {
     log::info!("[root] info");
     log::debug!("[root] debug");
     foo::run();
+}
+
+fn custom_env_variable_setup_logging() {
+    Builder::new()
+        .parse_env(&std::env::var("MY_APP_LOG").unwrap_or_default())
+        .init();
+
+    log::info!("informational message");
+    log::warn!("warning message");
+    log::error!("this is an error {}", "message");
 }
