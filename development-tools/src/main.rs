@@ -1,5 +1,14 @@
+use std::{error::Error, io::{self, Write}};
+use chrono::Local;
 use env_logger::{Builder, Target};
 use log::{Level, LevelFilter, Metadata, Record, SetLoggerError};
+use log4rs::{
+    append::file::FileAppender,
+    config::{runtime::{ConfigError, ConfigErrors}, Appender, Root},
+    encode::pattern::PatternEncoder,
+    Config,
+    
+};
 use syslog::Facility;
 
 fn main() {
@@ -18,6 +27,14 @@ fn main() {
 
     // should run alone
     //custom_env_variable_setup_logging();
+    //return;
+
+    // should run alone
+    //include_timestamp_in_log_message();
+    //return;
+
+    // should run alone
+    //log_message_to_custom_location();
     //return;
 
     let use_stdout = std::env::var("USE_STDOUT")
@@ -128,4 +145,39 @@ fn custom_env_variable_setup_logging() {
     log::info!("informational message");
     log::warn!("warning message");
     log::error!("this is an error {}", "message");
+}
+
+fn include_timestamp_in_log_message() {
+    Builder::new()
+        .format(|buf, record| {
+            writeln!(
+                buf,
+                "{} [{}] - {}",
+                Local::now().format("%Y-%m-%dT%H:%M:%S"),
+                record.level(),
+                record.args()
+            )
+        })
+        .filter(None, LevelFilter::Info)
+        .init();
+
+    log::warn!("warn");
+    log::info!("info");
+    log::debug!("debug");
+}
+
+fn log_message_to_custom_location() -> Result<(), io::Error>{
+    let logfile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
+        .build("log/output.log").unwrap();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("logfile", Box::new(logfile)))
+        .build(Root::builder().appender("logfile").build(LevelFilter::Info)).unwrap();
+
+    log4rs::init_config(config).unwrap();
+
+    log::info!("Hello, world!");
+
+    Ok(())
 }
