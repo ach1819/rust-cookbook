@@ -1,14 +1,14 @@
-use std::{error::Error, io::{self, Write}};
 use chrono::Local;
 use env_logger::{Builder, Target};
 use log::{Level, LevelFilter, Metadata, Record, SetLoggerError};
 use log4rs::{
     append::file::FileAppender,
-    config::{runtime::{ConfigError, ConfigErrors}, Appender, Root},
+    config::{Appender, Root},
     encode::pattern::PatternEncoder,
     Config,
-    
 };
+use semver::{BuildMetadata, Prerelease, Version};
+use std::{fmt::UpperHex, io::{self, Write}, ops::Add};
 use syslog::Facility;
 
 fn main() {
@@ -49,6 +49,10 @@ fn main() {
     log_debug_message();
     log_error_message();
     log_stdout_instead_stderr();
+
+
+    // versioning
+    parse_and_increment_version();
 }
 
 fn execute_query(query: &str) {
@@ -166,18 +170,48 @@ fn include_timestamp_in_log_message() {
     log::debug!("debug");
 }
 
-fn log_message_to_custom_location() -> Result<(), io::Error>{
+fn log_message_to_custom_location() -> Result<(), io::Error> {
     let logfile = FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new("{l} - {m}\n")))
-        .build("log/output.log").unwrap();
+        .build("log/output.log")
+        .unwrap();
 
     let config = Config::builder()
         .appender(Appender::builder().build("logfile", Box::new(logfile)))
-        .build(Root::builder().appender("logfile").build(LevelFilter::Info)).unwrap();
+        .build(Root::builder().appender("logfile").build(LevelFilter::Info))
+        .unwrap();
 
     log4rs::init_config(config).unwrap();
 
     log::info!("Hello, world!");
 
     Ok(())
+}
+
+
+fn parse_and_increment_version() {
+    println!("\nparse_and_increment_version - starts");
+    let mut parsed_version = Version::parse("0.2.6").unwrap();
+
+    assert_eq!(
+        parsed_version,
+        Version {
+            major: 0,
+            minor: 2,
+            patch: 6,
+            build: BuildMetadata::EMPTY,
+            pre: Prerelease::EMPTY
+        }
+    );
+
+    parsed_version.patch += 1;
+    assert_eq!(parsed_version.to_string(), "0.2.7");
+
+    parsed_version.minor += 1;
+    assert_eq!(parsed_version.to_string(), "0.3.7");
+
+    parsed_version.major += 1;
+    assert_eq!(parsed_version.to_string(), "1.3.7");
+
+    println!("parse_and_increment_version - OK");
 }
