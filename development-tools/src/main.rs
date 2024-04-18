@@ -8,7 +8,11 @@ use log4rs::{
     Config,
 };
 use semver::{BuildMetadata, Prerelease, Version};
-use std::{fmt::UpperHex, io::{self, Write}, ops::Add};
+use std::{
+    fmt::UpperHex,
+    io::{self, Write},
+    ops::Add,
+};
 use syslog::Facility;
 
 fn main() {
@@ -50,9 +54,9 @@ fn main() {
     log_error_message();
     log_stdout_instead_stderr();
 
-
     // versioning
     parse_and_increment_version();
+    parse_complex_version();
 }
 
 fn execute_query(query: &str) {
@@ -188,7 +192,6 @@ fn log_message_to_custom_location() -> Result<(), io::Error> {
     Ok(())
 }
 
-
 fn parse_and_increment_version() {
     println!("\nparse_and_increment_version - starts");
     let mut parsed_version = Version::parse("0.2.6").unwrap();
@@ -214,4 +217,27 @@ fn parse_and_increment_version() {
     assert_eq!(parsed_version.to_string(), "1.3.7");
 
     println!("parse_and_increment_version - OK");
+}
+
+fn parse_complex_version() {
+    println!("\nparse_complex_version - starts");
+    let version_str = "1.0.49-125+g72ee7853";
+    let parsed_version = Version::parse(version_str).unwrap();
+
+    assert_eq!(
+        parsed_version,
+        Version {
+            major: 1,
+            minor: 0,
+            patch: 49,
+            pre: Prerelease::new("125").unwrap(),
+            build: BuildMetadata::new("g72ee7853").unwrap()
+        }
+    );
+
+    assert_eq!(
+        parsed_version.build,
+        BuildMetadata::new("g72ee7853").unwrap()
+    );
+    println!("parse_complex_version - OK");
 }
