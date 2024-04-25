@@ -1,11 +1,13 @@
 use std::str::Utf8Error;
 
+use data_encoding::HEXUPPER;
 use percent_encoding::{percent_decode, utf8_percent_encode, AsciiSet, CONTROLS};
 use url::form_urlencoded::{byte_serialize, parse};
 
 fn main() {
     percent_encode_string().unwrap();
     encode_string_www_form_urlencoded();
+    encode_and_decode_hex();
 }
 
 const FRAGMENT: &AsciiSet = &CONTROLS.add(b' ').add(b'"').add(b'<').add(b'>').add(b'`');
@@ -40,4 +42,18 @@ fn encode_string_www_form_urlencoded() {
     println!("decoded: '{}'", decoded);
 
     println!("percent_encode_string - OK");
+}
+
+fn encode_and_decode_hex () {
+    println!("\nencode_and_decode_hex - starts");
+    let original = b"The quick brown fox jumps over the lazy dog";
+    let expected = "54686520717569636B2062726F776E20666F78206A756D7073206F76657220746865206C617A7920646F67";
+
+    let encoded = HEXUPPER.encode(original);
+    assert_eq!(encoded, expected);
+
+    let decode = HEXUPPER.decode(&encoded.into_bytes()).unwrap();
+    assert_eq!(&decode[..], &original[..]);
+
+    println!("encode_and_decode_hex - OK");
 }
