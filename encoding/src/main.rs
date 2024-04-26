@@ -1,5 +1,6 @@
-use std::str::Utf8Error;
+use std::str::{self, Utf8Error};
 
+use base64::{decode, encode};
 use data_encoding::HEXUPPER;
 use percent_encoding::{percent_decode, utf8_percent_encode, AsciiSet, CONTROLS};
 use url::form_urlencoded::{byte_serialize, parse};
@@ -8,6 +9,7 @@ fn main() {
     percent_encode_string().unwrap();
     encode_string_www_form_urlencoded();
     encode_and_decode_hex();
+    encode_decode_base64();
 }
 
 const FRAGMENT: &AsciiSet = &CONTROLS.add(b' ').add(b'"').add(b'<').add(b'>').add(b'`');
@@ -56,4 +58,17 @@ fn encode_and_decode_hex () {
     assert_eq!(&decode[..], &original[..]);
 
     println!("encode_and_decode_hex - OK");
+}
+
+fn encode_decode_base64() {
+    println!("\nencode_decode_base64 - starts");
+    let hello = b"hello rustaceans";
+    let encoded = encode(hello);
+    let decoded = decode(&encoded).unwrap();
+
+    println!("origin: {}", str::from_utf8(hello).unwrap());
+    println!("base64 encoded: {}", encoded);
+    println!("back to origin: {}", str::from_utf8(&decoded).unwrap());
+
+    println!("encode_decode_base64 - OK");
 }
